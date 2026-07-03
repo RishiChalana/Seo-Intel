@@ -171,6 +171,39 @@ token/cost telemetry math and per-step bucketing, clean API error mapping
 pipeline runs through the actual LangGraph graph with fakes injected at the
 LLM/search boundary.
 
+## Deployment
+
+Split deployment: the FastAPI backend runs on **Render**, the Vite frontend on
+**Vercel**. The two are decoupled by a single build-time env var — the frontend
+reads `VITE_API_URL`; nothing else is host-aware.
+
+- **Live frontend:** `https://<your-app>.vercel.app` _(fill in once deployed)_
+- **Live API:** `https://<your-service>.onrender.com` _(fill in once deployed)_
+
+**Backend (Render).** `render.yaml` is a Blueprint: New → Blueprint → point at
+this repo, or configure a Web Service manually with:
+
+- Build: `pip install -r requirements.txt`
+- Start: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- Health check path: `/health`
+- Env vars: `GEMINI_API_KEY` and `SERPAPI_KEY` (secrets, set in the dashboard);
+  `EMBEDDING_BACKEND=tfidf`, `SCRAPE_FULL_PAGES=true`, and `ALLOWED_ORIGINS`
+  (defaults to `*`; set to the Vercel URL to lock down CORS) ship as defaults.
+
+**Frontend (Vercel).** Import the repo, set **Root Directory** to `frontend`
+(Vercel auto-detects Vite from there; `vercel.json` pins the build command,
+`dist` output, and an SPA rewrite). Set one env var: `VITE_API_URL` = the Render
+API origin (no trailing slash, no `/brief`). Because Vite inlines `VITE_*` at
+build time, a change to this var requires a redeploy.
+
+**CORS note.** The API ships open (`allow_origins=["*"]`, no credentials, which
+is spec-legal). Once the Vercel URL is known, set `ALLOWED_ORIGINS` on Render to
+that origin to restrict it — no code change needed.
+
+**Free-tier caveat.** Render's free plan cold-starts after ~15 min idle (~50s
+spin-up), and a full brief run is itself ~30-45s. The first request after idle
+can therefore be slow; a warm service responds in normal pipeline time.
+
 ## What's out of scope (by design, not oversight)
 
 - Auth/rate-limiting on the API — internal tool, not public-facing

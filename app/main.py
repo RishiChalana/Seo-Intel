@@ -8,6 +8,7 @@ logic lives in app/graph.py) mirrors EchoRoom's structure for consistency.
 from __future__ import annotations
 
 import logging
+import os
 import time
 
 from dotenv import load_dotenv
@@ -58,9 +59,23 @@ app = FastAPI(
     version="1.0.0",
 )
 
+# CORS origins are env-driven so the deployed API can be locked to the Vercel
+# domain without a code change. Defaults to "*" (open) for local dev and the
+# initial deploy; set ALLOWED_ORIGINS to a comma-separated list once the
+# frontend URL is known, e.g. "https://seo-intel.vercel.app".
+_origins_env = os.environ.get("ALLOWED_ORIGINS", "*").strip()
+allow_origins = (
+    ["*"]
+    if _origins_env == "*"
+    else [o.strip() for o in _origins_env.split(",") if o.strip()]
+)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=allow_origins,
+    # No cookies/credentials are used; keeping this False is what makes the
+    # "*" origin legal per the CORS spec.
+    allow_credentials=False,
     allow_methods=["*"],
     allow_headers=["*"],
 )

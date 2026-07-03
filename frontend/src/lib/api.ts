@@ -1,8 +1,12 @@
 import type { ContentBrief, PipelineRequest } from "./types";
 
-// In dev, Vite proxies /api -> http://127.0.0.1:8000 (see vite.config.ts).
-// Override with VITE_API_BASE for a deployed backend.
-const API_BASE = import.meta.env.VITE_API_BASE ?? "/api";
+// Backend API base URL.
+// - Production (Vercel): set VITE_API_URL to the deployed backend origin,
+//   e.g. https://seo-intel-api.onrender.com  (no trailing /brief).
+// - Local dev: leave it unset -> falls back to "/api", which Vite proxies to
+//   http://127.0.0.1:8000 (see vite.config.ts).
+// Trailing slash is stripped so `${API_BASE}/brief` never doubles up.
+const API_BASE = (import.meta.env.VITE_API_URL ?? "/api").replace(/\/+$/, "");
 
 export class ApiError extends Error {
   constructor(

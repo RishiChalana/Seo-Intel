@@ -47,8 +47,8 @@ so start the backend first:
 uvicorn app.main:app --reload
 ```
 
-For a deployed backend, set `VITE_API_BASE` (e.g. `https://api.example.com`)
-instead of relying on the proxy.
+For a deployed backend, set `VITE_API_URL` (e.g. `https://seo-intel-api.onrender.com`)
+instead of relying on the proxy. See `.env.example`.
 
 ```bash
 npm run build        # type-check + production bundle to dist/

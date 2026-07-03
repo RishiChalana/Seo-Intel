@@ -1,0 +1,31 @@
+# Render Blueprint for the SEO Content Intelligence API.
+# Create the service by pointing Render at this repo (New > Blueprint), or
+# configure a Web Service manually with the buildCommand/startCommand below.
+services:
+  - type: web
+    name: seo-intel-api
+    runtime: python
+    plan: free
+    rootDir: .
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /health
+    envVars:
+      # Match the local interpreter; 3.12 has prebuilt wheels for every pinned
+      # dependency (numpy, scikit-learn, chromadb, lxml/trafilatura).
+      - key: PYTHON_VERSION
+        value: 3.12.3
+      # Secrets — set these in the Render dashboard (sync:false = not committed).
+      - key: GEMINI_API_KEY
+        sync: false
+      - key: SERPAPI_KEY
+        sync: false
+      # Optional, safe defaults baked in:
+      - key: EMBEDDING_BACKEND
+        value: tfidf
+      - key: SCRAPE_FULL_PAGES
+        value: "true"
+      # Lock this to the Vercel URL once known, e.g.
+      # https://seo-intel.vercel.app  (comma-separated for multiple).
+      - key: ALLOWED_ORIGINS
+        value: "*"
