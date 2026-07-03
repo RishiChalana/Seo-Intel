@@ -16,6 +16,7 @@ load_dotenv()
 
 from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
+from tenacity import RetryError
 
 from app.agents.research_agent import get_search_provider
 from app.core.llm import get_llm_client
@@ -24,6 +25,29 @@ from app.graph import run_pipeline
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger("seo-intel")
+
+
+def friendly_error(exc: Exception) -> tuple[int, str]:
+    """Translate an internal pipeline exception into a clean (status, detail)
+    for API consumers. Unwraps tenacity's RetryError to the underlying cause
+    and special-cases Gemini rate-limit/quota and missing-key errors so the
+    frontend shows something actionable instead of "RetryError[...]".
+    """
+    root: BaseException = exc
+    if isinstance(exc, RetryError) and exc.last_attempt is not None:
+        cause = exc.last_attempt.exception()
+        if cause is not None:
+            root = cause
+
+    text = str(root)
+    if "RESOURCE_EXHAUSTED" in text or "429" in text:
+        return 429, (
+            "Gemini API rate limit or daily quota reached. Wait a moment and "
+            "try again, or switch to a billed API key."
+        )
+    if "No LLM API key" in text or "SERPAPI_KEY not set" in text:
+        return 503, text
+    return 500, f"Pipeline failed: {text}"
 
 app = FastAPI(
     title="SEO Content Intelligence Pipeline",
@@ -54,9 +78,10 @@ async def create_brief(request: PipelineRequest):
         search_provider = get_search_provider()
         llm = get_llm_client()
         brief = await run_pipeline(request, search_provider, llm)
-    except Exception as exc:  # noqa: BLE001 - surface as clean 500 for API consumers
+    except Exception as exc:  # noqa: BLE001 - surface a clean error to API consumers
         logger.exception("Pipeline failed for topic=%s", request.topic)
-        raise HTTPException(status_code=500, detail=str(exc)) from exc
+        status, detail = friendly_error(exc)
+        raise HTTPException(status_code=status, detail=detail) from exc
 
     elapsed = time.monotonic() - start
     logger.info(

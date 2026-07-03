@@ -136,18 +136,38 @@ useful for demoing the full pipeline without a paid search API key.
 Set `SCRAPE_FULL_PAGES=false` to skip full-page fetching and use SERP snippets
 only (faster, zero extra HTTP requests, but shallower RAG context).
 
+## Frontend
+
+A React + TypeScript + Vite + Tailwind UI lives in `frontend/`, styled from the
+EMIAC "Strategic Precision" design system (Forest Green, warm paper backgrounds,
+Plus Jakarta Sans + DM Sans). It walks the user through topic input → an animated
+pipeline-execution view → a full content-brief dashboard (score gauges, outline
+document, real per-step token/cost telemetry, keyword clusters, content gaps),
+with export to Markdown / JSON / PDF.
+
+```bash
+cd frontend
+npm install
+npm run dev          # http://localhost:5173, proxies /api -> :8000
+```
+
+Run the backend (`uvicorn app.main:app --reload`) alongside it. See
+`frontend/README.md` for details. `src/lib/types.ts` mirrors the backend
+Pydantic schema exactly, so the API contract stays type-checked end to end.
+
 ## Testing
 
 ```bash
 pytest -q
 ```
 
-40 tests covering: deterministic scoring logic, RAG chunking/retrieval
+45 tests covering: deterministic scoring logic, RAG chunking/retrieval
 correctness (including a semantic relevance check — a query about pasta
 should retrieve the cooking page, not the finance page), keyword phrase
 extraction with real-world noisy text, full-page scraping extraction and
 all fallback paths (fetch failure, 403, thin content, mixed success/failure),
-token/cost telemetry math and per-step bucketing, and two full end-to-end
+token/cost telemetry math and per-step bucketing, clean API error mapping
+(quota/rate-limit → friendly 429, missing key → 503), and two full end-to-end
 pipeline runs through the actual LangGraph graph with fakes injected at the
 LLM/search boundary.
 
