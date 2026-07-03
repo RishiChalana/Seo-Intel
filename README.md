@@ -197,8 +197,11 @@ API origin (no trailing slash, no `/brief`). Because Vite inlines `VITE_*` at
 build time, a change to this var requires a redeploy.
 
 **CORS note.** The API ships open (`allow_origins=["*"]`, no credentials, which
-is spec-legal). Once the Vercel URL is known, set `ALLOWED_ORIGINS` on Render to
-that origin to restrict it — no code change needed.
+is spec-legal). A blank/unset `ALLOWED_ORIGINS` also resolves to open — only a
+non-empty value restricts. To lock down, set `ALLOWED_ORIGINS` on Render to the
+Vercel origin **with no trailing slash** (browsers send `Origin` without one, so
+`https://seo-intel.vercel.app/` would fail to match — use
+`https://seo-intel.vercel.app`). Comma-separate multiple origins.
 
 **Free-tier caveat.** Render's free plan cold-starts after ~15 min idle (~50s
 spin-up), and a full brief run is itself ~30-45s. The first request after idle

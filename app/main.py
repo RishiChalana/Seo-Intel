@@ -73,12 +73,13 @@ app = FastAPI(
 # domain without a code change. Defaults to "*" (open) for local dev and the
 # initial deploy; set ALLOWED_ORIGINS to a comma-separated list once the
 # frontend URL is known, e.g. "https://seo-intel.vercel.app".
+#
+# A blank/unset value means "use the open default" — NOT "allow nothing".
+# An empty allow-list would silently reject every cross-origin request
+# (preflights 400, no CORS headers), which is a confusing way to fail.
 _origins_env = os.environ.get("ALLOWED_ORIGINS", "*").strip()
-allow_origins = (
-    ["*"]
-    if _origins_env == "*"
-    else [o.strip() for o in _origins_env.split(",") if o.strip()]
-)
+_parsed_origins = [o.strip() for o in _origins_env.split(",") if o.strip()]
+allow_origins = ["*"] if (not _parsed_origins or "*" in _parsed_origins) else _parsed_origins
 
 app.add_middleware(
     CORSMiddleware,
