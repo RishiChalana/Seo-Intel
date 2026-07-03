@@ -40,7 +40,17 @@ def friendly_error(exc: Exception) -> tuple[int, str]:
         if cause is not None:
             root = cause
 
-    text = str(root)
+    # Some exceptions carry an empty message (e.g. MemoryError), which would
+    # otherwise surface as a useless "Pipeline failed: ". Fall back to the
+    # class name so the error is always identifiable.
+    text = str(root).strip() or type(root).__name__
+
+    if isinstance(root, MemoryError):
+        return 503, (
+            "The server ran out of memory while building the analysis. This "
+            "pipeline (vector store + embeddings) needs more RAM than a small "
+            "free instance provides — upgrade the instance size and retry."
+        )
     if "RESOURCE_EXHAUSTED" in text or "429" in text:
         return 429, (
             "Gemini API rate limit or daily quota reached. Wait a moment and "
@@ -48,7 +58,7 @@ def friendly_error(exc: Exception) -> tuple[int, str]:
         )
     if "No LLM API key" in text or "SERPAPI_KEY not set" in text:
         return 503, text
-    return 500, f"Pipeline failed: {text}"
+    return 500, f"Pipeline failed ({type(root).__name__}): {text}"
 
 app = FastAPI(
     title="SEO Content Intelligence Pipeline",

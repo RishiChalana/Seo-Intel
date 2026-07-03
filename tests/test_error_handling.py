@@ -39,6 +39,20 @@ def test_generic_error_maps_to_500():
     status, detail = friendly_error(ValueError("something odd happened"))
     assert status == 500
     assert "something odd happened" in detail
+    assert "ValueError" in detail  # type name is included for identifiability
+
+
+def test_empty_message_error_falls_back_to_type_name():
+    # MemoryError has an empty str(); the detail must still identify it.
+    status, detail = friendly_error(RuntimeError())
+    assert status == 500
+    assert "RuntimeError" in detail
+
+
+def test_memory_error_maps_to_503_with_helpful_message():
+    status, detail = friendly_error(MemoryError())
+    assert status == 503
+    assert "memory" in detail.lower()
 
 
 def test_retry_error_generic_cause_still_unwrapped():
