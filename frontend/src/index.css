@@ -1,0 +1,51 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-surface-paper font-body text-on-surface antialiased;
+  }
+  h1,
+  h2,
+  h3,
+  h4 {
+    @apply font-heading;
+  }
+}
+
+/* Radial score gauge stroke animation (from the Stitch design system) */
+.gauge-ring {
+  fill: none;
+  stroke-width: 2.8;
+  stroke-linecap: round;
+  transform: rotate(-90deg);
+  transform-origin: center;
+  transition: stroke-dasharray 1s ease-out;
+}
+.gauge-bg {
+  fill: none;
+  stroke: #e2e2e2;
+  stroke-width: 2.8;
+}
+
+/* Print styles for the PDF export — only the brief document prints cleanly */
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #print-area,
+  #print-area * {
+    visibility: visible;
+  }
+  #print-area {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 24px;
+  }
+  .no-print {
+    display: none !important;
+  }
+}

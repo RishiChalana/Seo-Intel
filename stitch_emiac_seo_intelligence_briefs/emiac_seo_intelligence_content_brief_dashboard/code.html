@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+
+<html lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>EMIAC SEO Intelligence - Brief Pipeline</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&amp;family=Plus+Jakarta+Sans:wght@600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-primary-fixed": "#002114",
+                        "surface-container": "#eeeeee",
+                        "tertiary": "#3c403e",
+                        "surface-paper": "#F6F4F1",
+                        "on-secondary-fixed": "#1b1c1a",
+                        "tertiary-fixed-dim": "#c4c7c5",
+                        "primary-fixed-dim": "#86d7b0",
+                        "inverse-primary": "#86d7b0",
+                        "inverse-on-surface": "#f1f1f1",
+                        "primary-fixed": "#a2f3cb",
+                        "surface-container-highest": "#e2e2e2",
+                        "background": "#f9f9f9",
+                        "outline-variant": "#bec9c1",
+                        "surface-tint": "#126b4c",
+                        "secondary": "#5e5e5c",
+                        "on-surface": "#1b1b1b",
+                        "primary-container": "#006344",
+                        "brand-deep": "#004D35",
+                        "error": "#ba1a1a",
+                        "surface-container-lowest": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-tertiary-container": "#c9cdca",
+                        "on-secondary": "#ffffff",
+                        "on-primary": "#ffffff",
+                        "surface-container-low": "#f3f3f3",
+                        "surface-variant": "#e2e2e2",
+                        "tertiary-fixed": "#e0e3e0",
+                        "inverse-surface": "#303030",
+                        "on-tertiary-fixed-variant": "#444846",
+                        "surface": "#f9f9f9",
+                        "primary": "#004931",
+                        "error-container": "#ffdad6",
+                        "on-tertiary-fixed": "#181c1b",
+                        "on-primary-container": "#8cdcb5",
+                        "on-secondary-fixed-variant": "#474745",
+                        "on-background": "#1b1b1b",
+                        "on-tertiary": "#ffffff",
+                        "secondary-fixed-dim": "#c8c6c3",
+                        "on-primary-fixed-variant": "#005137",
+                        "white": "#FFFFFF",
+                        "on-error": "#ffffff",
+                        "surface-container-high": "#e8e8e8",
+                        "on-surface-variant": "#3f4943",
+                        "on-secondary-container": "#636360",
+                        "surface-bright": "#f9f9f9",
+                        "outline": "#6f7a72",
+                        "tertiary-container": "#535755",
+                        "surface-dim": "#dadada",
+                        "secondary-container": "#e1dfdc",
+                        "secondary-fixed": "#e4e2df"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.125rem",
+                        "lg": "0.25rem",
+                        "xl": "0.5rem",
+                        "full": "0.75rem"
+                    },
+                    "spacing": {
+                        "base": "8px",
+                        "margin-mobile": "16px",
+                        "gutter": "24px",
+                        "container-max": "1440px",
+                        "section-gap": "80px",
+                        "margin-desktop": "40px"
+                    },
+                    "fontFamily": {
+                        "body-sm": ["DM Sans"],
+                        "display-lg": ["Plus Jakarta Sans"],
+                        "display-lg-mobile": ["Plus Jakarta Sans"],
+                        "headline-sm": ["Plus Jakarta Sans"],
+                        "body-md": ["DM Sans"],
+                        "headline-md": ["Plus Jakarta Sans"],
+                        "headline-lg": ["Plus Jakarta Sans"],
+                        "body-lg": ["DM Sans"],
+                        "label-lg": ["DM Sans"],
+                        "label-sm": ["DM Sans"]
+                    },
+                    "fontSize": {
+                        "body-sm": ["14px", { "lineHeight": "20px", "fontWeight": "400" }],
+                        "display-lg": ["48px", { "lineHeight": "56px", "letterSpacing": "-0.02em", "fontWeight": "700" }],
+                        "display-lg-mobile": ["32px", { "lineHeight": "40px", "letterSpacing": "-0.01em", "fontWeight": "700" }],
+                        "headline-sm": ["20px", { "lineHeight": "28px", "fontWeight": "600" }],
+                        "body-md": ["16px", { "lineHeight": "24px", "fontWeight": "400" }],
+                        "headline-md": ["24px", { "lineHeight": "32px", "fontWeight": "600" }],
+                        "headline-lg": ["32px", { "lineHeight": "40px", "fontWeight": "600" }],
+                        "body-lg": ["18px", { "lineHeight": "28px", "fontWeight": "400" }],
+                        "label-lg": ["14px", { "lineHeight": "20px", "letterSpacing": "0.02em", "fontWeight": "500" }],
+                        "label-sm": ["12px", { "lineHeight": "16px", "letterSpacing": "0.04em", "fontWeight": "500" }]
+                    }
+                }
+            }
+        }
+    </script>
+<style>
+        .circular-chart {
+            display: block;
+            margin: 0 auto;
+            max-width: 100%;
+            max-height: 250px;
+        }
+        .circle-bg {
+            fill: none;
+            stroke: #eee;
+            stroke-width: 3.8;
+        }
+        .circle {
+            fill: none;
+            stroke-width: 2.8;
+            stroke-linecap: round;
+            animation: progress 1s ease-out forwards;
+        }
+        @keyframes progress {
+            0% {
+                stroke-dasharray: 0 100;
+            }
+        }
+        .percentage {
+            font-family: "Plus Jakarta Sans";
+            font-weight: 700;
+            fill: #1b1b1b;
+            text-anchor: middle;
+            font-size: 8px;
+        }
+        .gauge-label {
+            font-family: "DM Sans";
+            font-weight: 500;
+            fill: #5e5e5c;
+            text-anchor: middle;
+            font-size: 3.5px;
+        }
+    </style>
+</head>
+<body class="bg-surface-paper font-body-md text-body-md text-on-surface antialiased min-h-screen flex flex-col md:flex-row">
+<!-- Side Nav Bar (JSON Blueprint) -->
+<nav class="hidden md:flex flex-col fixed left-0 top-16 h-[calc(100vh-64px)] w-64 py-margin-mobile border-r border-outline-variant bg-surface-paper dark:bg-inverse-surface z-40">
+<div class="px-6 pb-6">
+<div class="flex items-center gap-3">
+<img alt="EMIAC Technologies Logo" class="h-8 w-auto object-contain bg-white rounded p-1" src="https://lh3.googleusercontent.com/aida/AP1WRLt8PxeLZftTYM98Unh3i40XGRThMEIHA2ea4mYatxTVVav3l-AbMwrPFKUKqpxagn4kJqaSePb2GTKHqaKlWT7g4Pjoay-5m9PoHx2QAA19-Wi2QyC-MpySbDq5mVFOyTIduuGfKX03qrWwTbryUoUL4yR_HOsIQNSMbIHzVno4Tstrs5mzgAF8xcJvawVaU2lG8hxMmgqMhSLJlb2LN83HanyC2n0E7f0LslMs6UNh3E4zcPtXKUdH6msJ"/>
+<div>
+<h2 class="font-headline-sm text-headline-sm text-brand-deep">Project Alpha</h2>
+<p class="font-label-sm text-label-sm text-secondary">Enterprise SEO</p>
+</div>
+</div>
+<button class="mt-6 w-full bg-primary-container text-white py-2 px-4 rounded-DEFAULT font-label-lg text-label-lg flex items-center justify-center gap-2 hover:bg-brand-deep transition-colors">
+<span class="material-symbols-outlined text-[18px]">add</span>
+                New Brief
+            </button>
+</div>
+<div class="flex-1 overflow-y-auto mt-4 px-3 space-y-1">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">dashboard</span>
+<span class="font-label-lg text-label-lg">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">search_insights</span>
+<span class="font-label-lg text-label-lg">Topic Research</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-primary font-bold bg-surface-container border-r-4 border-primary scale-95 transition-transform group" href="#">
+<span class="material-symbols-outlined text-[20px] text-primary">precision_manufacturing</span>
+<span class="font-label-lg text-label-lg">Brief Pipeline</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">map</span>
+<span class="font-label-lg text-label-lg">Keyword Map</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined text-[20px] group-hover:text-primary transition-colors">ios_share</span>
+<span class="font-label-lg text-label-lg">Exports</span>
+</a>
+</div>
+<div class="mt-auto px-3 py-4 space-y-1 border-t border-outline-variant">
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined text-[20px]">help_outline</span>
+<span class="font-label-lg text-label-lg">Support</span>
+</a>
+<a class="flex items-center gap-3 px-3 py-2 rounded-lg text-on-surface-variant hover:text-primary hover:bg-surface-container-highest transition-all duration-200 group" href="#">
+<span class="material-symbols-outlined text-[20px]">inventory_2</span>
+<span class="font-label-lg text-label-lg">Archive</span>
+</a>
+</div>
+</nav>
+<!-- Top Nav Bar (JSON Blueprint) -->
+<header class="fixed top-0 left-0 w-full z-50 flex justify-between items-center px-margin-desktop h-16 bg-white border-b border-surface-variant no-shadows">
+<div class="flex items-center gap-8 h-full">
+<a class="font-headline-md text-headline-md font-bold text-brand-deep flex items-center h-full" href="#">
+                EMIAC SEO Intelligence
+            </a>
+<div class="hidden md:flex h-full items-end gap-6 pb-0">
+<a class="text-secondary hover:text-primary font-body-md text-body-md hover:bg-surface-container-low transition-colors duration-200 h-full flex items-center px-2" href="#">Projects</a>
+<a class="text-primary font-bold border-b-2 border-primary pb-1 font-body-md text-body-md opacity-80 transition-opacity duration-150 h-full flex items-center px-2 pt-1" href="#">Briefs</a>
+<a class="text-secondary hover:text-primary font-body-md text-body-md hover:bg-surface-container-low transition-colors duration-200 h-full flex items-center px-2" href="#">Workflows</a>
+<a class="text-secondary hover:text-primary font-body-md text-body-md hover:bg-surface-container-low transition-colors duration-200 h-full flex items-center px-2" href="#">Analytics</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="text-secondary hover:text-primary p-2 rounded-full hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+<button class="text-secondary hover:text-primary p-2 rounded-full hover:bg-surface-container-low transition-colors">
+<span class="material-symbols-outlined">settings</span>
+</button>
+<div class="w-8 h-8 rounded-full bg-surface-container border border-outline-variant overflow-hidden">
+<img alt="User Profile" class="w-full h-full object-cover" data-alt="A small, professional headshot of an executive in a modern office, softly lit, corporate modern style, sharp focus." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB7kAmHbRg8TEg3JwmyGGO_Ozjtt9yQgdJmOdP7m2Hr_oI9oWyMKF1IGgwz5pBBoK6HXh1W4vtLZqwJ_wwQ26R4qbjeOUUmmd44vHrZs5R-mQ8yWo5BE-JOG4D8V3QPOhUOHEhzuPd8CjPB_gep254DTn89s10ye_DGP-M8YAApk6BdjcXpzHEotqwbElDxZT4xArj3sR5O0mpz6ozGFz0FfgGTbIuMfc0GXk4SVzSaiTZ6qDACmOvfVg"/>
+</div>
+</div>
+</header>
+<!-- Main Content Area -->
+<main class="flex-1 mt-16 md:ml-64 p-margin-mobile md:p-margin-desktop max-w-[container-max] w-full mx-auto relative overflow-x-hidden">
+<!-- Sticky Header (Topic & Export) -->
+<div class="sticky top-16 z-30 bg-surface-paper/95 backdrop-blur-sm pt-4 pb-6 border-b border-outline-variant mb-gutter flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+<div>
+<div class="flex items-center gap-2 mb-1">
+<span class="px-2 py-0.5 rounded-sm bg-surface-tint/10 text-surface-tint font-label-sm text-label-sm uppercase tracking-widest border border-surface-tint/20">Content Brief</span>
+<span class="text-secondary font-label-sm text-label-sm flex items-center"><span class="material-symbols-outlined text-[14px] mr-1">history</span> Updated 2 hrs ago</span>
+</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface">Email Marketing Automation</h1>
+</div>
+<div class="flex items-center gap-3">
+<button class="bg-transparent border border-primary text-primary px-4 py-2 rounded-DEFAULT font-label-lg text-label-lg flex items-center gap-2 hover:bg-primary/5 transition-colors">
+<span class="material-symbols-outlined text-[18px]">share</span>
+                    Share
+                </button>
+<button class="bg-primary-container text-white px-5 py-2 rounded-DEFAULT font-label-lg text-label-lg flex items-center gap-2 hover:bg-brand-deep transition-colors shadow-sm">
+<span class="material-symbols-outlined text-[18px]">ios_share</span>
+                    Export Brief
+                </button>
+</div>
+</div>
+<div class="grid grid-cols-1 xl:grid-cols-12 gap-gutter">
+<!-- Left Column: Outline & Gaps -->
+<div class="xl:col-span-8 space-y-gutter">
+<!-- Score Overview Card (Bento/Gauges) -->
+<div class="bg-white border border-outline-variant rounded-lg p-6 shadow-[0_2px_12px_rgba(0,77,53,0.03)]">
+<h2 class="font-headline-sm text-headline-sm text-on-surface mb-6 flex items-center gap-2">
+<span class="material-symbols-outlined text-surface-tint">speed</span> Intelligence Scoring
+                    </h2>
+<div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
+<!-- Gauge 1 -->
+<div class="flex flex-col items-center">
+<svg class="circular-chart text-surface-tint w-20 h-20" viewbox="0 0 36 36">
+<path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+<path class="circle stroke-current" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="92, 100"></path>
+<text class="percentage" x="18" y="20.5">92</text>
+</svg>
+<span class="font-label-sm text-label-sm text-secondary mt-2 text-center uppercase tracking-wider">Overall<br/>Score</span>
+</div>
+<!-- Gauge 2 -->
+<div class="flex flex-col items-center">
+<svg class="circular-chart text-primary-fixed-dim w-20 h-20" viewbox="0 0 36 36">
+<path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+<path class="circle stroke-current" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="85, 100"></path>
+<text class="percentage" x="18" y="20.5">85</text>
+</svg>
+<span class="font-label-sm text-label-sm text-secondary mt-2 text-center uppercase tracking-wider">Keyword<br/>Coverage</span>
+</div>
+<!-- Gauge 3 -->
+<div class="flex flex-col items-center">
+<svg class="circular-chart text-brand-deep w-20 h-20" viewbox="0 0 36 36">
+<path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+<path class="circle stroke-current" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="78, 100"></path>
+<text class="percentage" x="18" y="20.5">78</text>
+</svg>
+<span class="font-label-sm text-label-sm text-secondary mt-2 text-center uppercase tracking-wider">Readability<br/>Index</span>
+</div>
+<!-- Gauge 4 -->
+<div class="flex flex-col items-center">
+<svg class="circular-chart text-on-primary-fixed-variant w-20 h-20" viewbox="0 0 36 36">
+<path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+<path class="circle stroke-current" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="95, 100"></path>
+<text class="percentage" x="18" y="20.5">95</text>
+</svg>
+<span class="font-label-sm text-label-sm text-secondary mt-2 text-center uppercase tracking-wider">Intent<br/>Match</span>
+</div>
+<!-- Gauge 5 -->
+<div class="flex flex-col items-center">
+<svg class="circular-chart text-outline w-20 h-20" viewbox="0 0 36 36">
+<path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831"></path>
+<path class="circle stroke-current" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" stroke-dasharray="64, 100"></path>
+<text class="percentage" x="18" y="20.5">64</text>
+</svg>
+<span class="font-label-sm text-label-sm text-secondary mt-2 text-center uppercase tracking-wider">Entity<br/>Density</span>
+</div>
+</div>
+</div>
+<!-- Content Outline Document Render -->
+<div class="bg-white border border-outline-variant rounded-lg p-8 shadow-[0_2px_12px_rgba(0,77,53,0.03)] min-h-[500px]">
+<div class="flex items-center justify-between border-b border-surface-variant pb-4 mb-6">
+<h2 class="font-headline-sm text-headline-sm text-on-surface flex items-center gap-2">
+<span class="material-symbols-outlined text-surface-tint">segment</span> Suggested Outline
+                        </h2>
+<span class="font-label-sm text-label-sm text-secondary bg-surface px-2 py-1 rounded">Target: 2,500 words</span>
+</div>
+<div class="space-y-6 max-w-3xl">
+<!-- H1 -->
+<div class="relative pl-6 border-l-2 border-surface-tint/30 pb-2">
+<div class="absolute -left-3 top-1 bg-white p-1 rounded-full border border-surface-tint/30 text-[10px] font-bold text-surface-tint">H1</div>
+<h1 class="font-headline-lg text-headline-lg text-on-surface leading-tight mb-2">The Ultimate Guide to Email Marketing Automation in 2024</h1>
+<p class="font-body-sm text-body-sm text-secondary italic">Core intent: Educational / Transactional hybrid. Establish authority.</p>
+</div>
+<!-- H2 -->
+<div class="relative pl-6 ml-4 border-l-2 border-outline-variant pb-2">
+<div class="absolute -left-3 top-1 bg-white p-1 rounded-full border border-outline-variant text-[10px] font-bold text-secondary">H2</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">What is Email Automation?</h2>
+<div class="flex gap-2 flex-wrap mt-2">
+<span class="bg-surface text-secondary px-2 py-0.5 rounded-sm font-label-sm text-[10px]">Keyword: drip campaigns</span>
+<span class="bg-surface text-secondary px-2 py-0.5 rounded-sm font-label-sm text-[10px]">Keyword: autoresponders</span>
+</div>
+</div>
+<!-- H3 -->
+<div class="relative pl-6 ml-10 border-l-2 border-surface-variant pb-2">
+<div class="absolute -left-3 top-1 bg-white p-1 rounded-full border border-surface-variant text-[10px] font-bold text-secondary">H3</div>
+<h3 class="font-headline-sm text-headline-sm text-on-surface-variant mb-2">Triggers vs. Actions</h3>
+<p class="font-body-sm text-body-sm text-secondary">Explain the logic gates (if/then) of modern ESPs.</p>
+</div>
+<!-- H2 -->
+<div class="relative pl-6 ml-4 border-l-2 border-outline-variant pb-2">
+<div class="absolute -left-3 top-1 bg-white p-1 rounded-full border border-outline-variant text-[10px] font-bold text-secondary">H2</div>
+<h2 class="font-headline-md text-headline-md text-on-surface mb-2">Top 5 Automation Workflows You Need</h2>
+<ul class="list-disc pl-5 mt-2 font-body-sm text-body-sm text-secondary space-y-1">
+<li>Welcome Series (Onboarding)</li>
+<li>Cart Abandonment (E-commerce)</li>
+<li>Re-engagement / Win-back</li>
+</ul>
+</div>
+</div>
+</div>
+</div>
+<!-- Right Column: Telemetry, Clusters, Gaps -->
+<div class="xl:col-span-4 space-y-gutter">
+<!-- Telemetry Widget -->
+<div class="bg-white border border-outline-variant rounded-lg p-6 shadow-[0_2px_12px_rgba(0,77,53,0.03)] relative overflow-hidden">
+<!-- Subtle background pattern for tech feel -->
+<div class="absolute -right-4 -top-4 opacity-5 pointer-events-none">
+<span class="material-symbols-outlined text-[120px]">memory</span>
+</div>
+<h3 class="font-label-lg text-label-lg text-secondary uppercase tracking-widest mb-4">Run Telemetry</h3>
+<div class="flex items-baseline gap-2 mb-4">
+<span class="font-display-lg text-display-lg text-on-surface">$0.0187</span>
+<span class="font-label-sm text-label-sm text-secondary">cost</span>
+</div>
+<div class="space-y-3 border-t border-surface-variant pt-4">
+<div class="flex justify-between items-center font-body-sm text-body-sm">
+<span class="text-secondary">Model</span>
+<span class="text-on-surface font-medium">GPT-4-Turbo</span>
+</div>
+<div class="flex justify-between items-center font-body-sm text-body-sm">
+<span class="text-secondary">Input Tokens</span>
+<span class="text-on-surface font-medium">1,204</span>
+</div>
+<div class="flex justify-between items-center font-body-sm text-body-sm">
+<span class="text-secondary">Output Tokens</span>
+<span class="text-on-surface font-medium">842</span>
+</div>
+<div class="flex justify-between items-center font-body-sm text-body-sm">
+<span class="text-secondary">Latency</span>
+<span class="text-on-surface font-medium">4.2s</span>
+</div>
+</div>
+</div>
+<!-- Keyword Clusters Card -->
+<div class="bg-white border border-outline-variant rounded-lg p-6 shadow-[0_2px_12px_rgba(0,77,53,0.03)]">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-surface-tint">hub</span> Semantic Clusters
+                    </h3>
+<div class="space-y-4">
+<!-- Cluster 1 -->
+<div class="border border-surface-variant rounded p-3 bg-surface-bright">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">Software Platforms</span>
+<span class="bg-primary-container/10 text-primary-container px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide">Commercial</span>
+</div>
+<div class="flex flex-wrap gap-1.5">
+<span class="px-2 py-1 bg-white border border-outline-variant rounded text-[11px] text-on-surface-variant">mailchimp automation</span>
+<span class="px-2 py-1 bg-white border border-outline-variant rounded text-[11px] text-on-surface-variant">activecampaign pricing</span>
+<span class="px-2 py-1 bg-white border border-outline-variant rounded text-[11px] text-on-surface-variant">hubspot workflows</span>
+</div>
+</div>
+<!-- Cluster 2 -->
+<div class="border border-surface-variant rounded p-3 bg-surface-bright">
+<div class="flex justify-between items-start mb-2">
+<span class="font-label-lg text-label-lg font-bold text-on-surface">Strategy &amp; Theory</span>
+<span class="bg-secondary/10 text-secondary px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide">Informational</span>
+</div>
+<div class="flex flex-wrap gap-1.5">
+<span class="px-2 py-1 bg-white border border-outline-variant rounded text-[11px] text-on-surface-variant">what is a drip campaign</span>
+<span class="px-2 py-1 bg-white border border-outline-variant rounded text-[11px] text-on-surface-variant">email segmentation strategy</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Content Gaps Card -->
+<div class="bg-white border border-outline-variant rounded-lg p-6 shadow-[0_2px_12px_rgba(0,77,53,0.03)] border-l-4 border-l-surface-tint">
+<h3 class="font-headline-sm text-headline-sm text-on-surface mb-2 flex items-center gap-2">
+<span class="material-symbols-outlined text-surface-tint">radar</span> Content Gaps
+                    </h3>
+<p class="font-body-sm text-body-sm text-secondary mb-4">Competitors are ranking for these topics, but they are missing from your current draft structure.</p>
+<ul class="space-y-2 font-body-sm text-body-sm text-on-surface">
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-surface-tint text-[18px] mt-0.5">add_circle</span>
+<span><strong>GDPR Compliance:</strong> Mentioned by top 3 SERP results. High priority.</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-surface-tint text-[18px] mt-0.5">add_circle</span>
+<span><strong>AI in Email:</strong> Emerging topic with high search velocity.</span>
+</li>
+<li class="flex items-start gap-2">
+<span class="material-symbols-outlined text-outline text-[18px] mt-0.5">add_circle</span>
+<span class="text-secondary">SMS Integration (Low priority)</span>
+</li>
+</ul>
+</div>
+</div>
+</div>
+</main>
+</body></html>
