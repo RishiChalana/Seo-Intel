@@ -1,10 +1,10 @@
 # SEO Content Intelligence Pipeline
 
 A multi-agent system that turns a topic into a competitor-grounded, SEO-optimized
-content brief: it researches top-ranking pages, indexes them into a vector store,
-clusters target keywords by intent, generates a structured outline grounded in
-what competitors actually cover, and scores the result against a deterministic
-rubric.
+content brief: it researches top-ranking pages, fetches and parses their full HTML,
+indexes them into a vector store, clusters target keywords by intent, generates a
+structured outline grounded in what competitors actually cover, and scores the result
+against a deterministic rubric.
 
 Built for a content marketing team's internal tooling — the kind of research
 work a strategist currently does manually across search results, keyword tools,
@@ -19,12 +19,13 @@ is independently testable, and — critically — later stages are *grounded* in
 earlier stages' real output instead of the LLM inventing structure from its
 training prior.
 
-**RAG over competitor content, not just an LLM asked to "know" the topic.**
-The Structure agent doesn't outline from memory. It retrieves the most relevant
-chunks of actual top-ranking competitor pages (via a Chroma vector store) and
-writes the outline against that retrieved context — this is what lets it
-identify genuine content gaps ("competitors all cover X and Y, none cover Z")
-instead of producing a plausible-sounding but generic structure.
+**RAG over full competitor articles, not just search snippets.**
+The Structure agent doesn't outline from memory. `SerpAPIProvider` fetches each
+competitor URL and extracts the full article body with trafilatura (stripping nav,
+scripts, and boilerplate), so the Chroma RAG store contains thousands of words of
+real competitor content instead of 150-word SERP snippets. Any page that fails to
+fetch or yields thin content transparently falls back to its snippet — one
+paywalled or bot-blocking URL never degrades the rest of the run.
 
 **Scoring is a rubric, not an LLM opinion.** `eval_agent.py` computes
 `keyword_coverage`, `structure_completeness`, and `eeat_signal_score`
@@ -33,13 +34,22 @@ established Flesch-Kincaid formula (`textstat`). No "ask the LLM to grade
 itself" — that's ungrounded and irreproducible. Anyone can re-run the same
 outline through `score_brief()` and get the same number.
 
-**Every external dependency is pluggable.** Search provider, embedding
-backend, and LLM client are all defined as abstract interfaces with a
+**Token and cost telemetry is first-class.** Every Gemini call records its
+`prompt_token_count`, `candidates_token_count`, and `thoughts_token_count` (2.5
+Flash thinking tokens are billed at the output rate). The `UsageTracker` buckets
+usage by response-schema name — so the `usage.by_step` field on every
+`ContentBrief` gives a per-pipeline-stage breakdown without threading a "step
+name" through any agent's call signature. Cost estimates use a clearly-labeled
+pricing table; they're relative visibility, not billing-grade accounting.
+
+**Every external dependency is pluggable.** Search provider, page-content source,
+embedding backend, and LLM client are all defined as abstract interfaces with a
 production implementation and a local/offline implementation:
 
 | Component | Production | Local/offline default |
 |---|---|---|
 | Search | `SerpAPIProvider` (needs `SERPAPI_KEY`) | `MockSearchProvider` (deterministic fixtures) |
+| Page content | Full HTML fetch + trafilatura extraction (`SCRAPE_FULL_PAGES=true`, default) | SERP snippets only (`SCRAPE_FULL_PAGES=false`, ~150 words/page) |
 | Embeddings | `VoyageEmbedder` (needs `VOYAGE_API_KEY`) | `TfidfEmbedder` (scikit-learn, zero cost) |
 | LLM | `GeminiLLMClient` (needs `GEMINI_API_KEY`) | `FakeLLMClient` (test stub, injected) |
 
@@ -55,23 +65,27 @@ PipelineRequest
       ▼
  ┌─────────┐    ┌───────┐    ┌──────────┐    ┌──────────┐    ┌───────┐
  │Research │───▶│ Index │───▶│ Keywords │───▶│ Outline  │───▶│ Score │──▶ ContentBrief
- │ Agent   │    │ (RAG) │    │  Agent   │    │  Agent   │    │ Agent │
+ │ Agent   │    │ (RAG) │    │  Agent   │    │  Agent   │    │ Agent │     + usage
  └─────────┘    └───────┘    └──────────┘    └──────────┘    └───────┘
-   fetches       chunks +     clusters        retrieves        computes
-   top-N          embeds      candidate       competitor        rubric
-   competitor    competitor   keywords by     chunks from       score
-   pages         pages into   embedding       RAG store,        (no LLM
-                 Chroma       similarity      generates         self-grading)
-                 (per-run)    (KMeans),       grounded
-                              LLM labels      outline
-                              intent
+   fetches        chunks +    clusters        retrieves        computes
+   top-N           embeds     candidate       competitor        rubric
+   competitor     competitor  keywords by     chunks from       score
+   pages; fetches  pages into embedding       RAG store,        (no LLM
+   full HTML,      Chroma     similarity      generates         self-grading)
+   falls back      (per-run)  (KMeans),       grounded
+   to snippet                 LLM labels      outline
+   on error                   intent
 ```
+
+Token + cost telemetry is a cross-cutting concern: `GeminiLLMClient` records
+`usage_metadata` from every response into a `UsageTracker`. At the end of the
+run the tracker snapshots per-step and aggregate totals onto `ContentBrief.usage`.
 
 Orchestrated as a LangGraph `StateGraph` (same pattern used in EchoRoom/Helm)
 so each node's input/output is independently inspectable — useful when a run
 produces a bad brief and you need to know which stage caused it.
 
-## Real bugs hit building this (kept here because they were worth learning from)
+## Real bugs and constraints hit building this
 
 1. **RAG store lost between graph nodes.** Initially stashed the `CompetitorRAGStore`
    (a live Chroma collection, not serializable) directly on the LangGraph state
@@ -90,22 +104,37 @@ produces a bad brief and you need to know which stage caused it.
    the store. Fixed by giving each consumer its own embedder instance via a
    factory function rather than sharing one.
 
-Both were caught by the integration test (`test_pipeline_integration.py`)
-before ever touching a real API — which is the actual argument for writing
-that test in the first place.
+3. **Full-page scraping reliably blocked by major SEO properties.** Even with a
+   legitimate browser User-Agent string, large content-marketing sites (Mailchimp,
+   tool-comparison blogs) return 403 or time out — they detect non-browser
+   request patterns. On a typical 3-page live fetch, 1–2 pages succeed (10–20×
+   more content than their snippet) and the remainder fall back silently. The
+   fallback path is validated end-to-end: any page that returns an error, a
+   non-200 status, or fewer than 60 extracted words reverts to its SERP snippet,
+   and the pipeline completes normally. Consistent full-page extraction at scale
+   would require a scraping API (ScraperAPI, Zyte) with rotating proxies and
+   JS rendering — that's the correct production path but is out of scope here.
+
+All three were caught or validated by the test suite before touching production
+traffic — which is the actual argument for writing the integration tests in the
+first place.
 
 ## Running it
 
 ```bash
 pip install -r requirements.txt
-cp .env.example .env   # fill in GEMINI_API_KEY
+cp .env.example .env   # fill in GEMINI_API_KEY and SERPAPI_KEY
 
 uvicorn app.main:app --reload
 # POST http://localhost:8000/brief  {"topic": "email marketing automation"}
+# GET  http://localhost:8000/docs   (OpenAPI schema with full ContentBrief response)
 ```
 
 Without `SERPAPI_KEY` set, the app runs against `MockSearchProvider` fixtures —
 useful for demoing the full pipeline without a paid search API key.
+
+Set `SCRAPE_FULL_PAGES=false` to skip full-page fetching and use SERP snippets
+only (faster, zero extra HTTP requests, but shallower RAG context).
 
 ## Testing
 
@@ -113,17 +142,21 @@ useful for demoing the full pipeline without a paid search API key.
 pytest -q
 ```
 
-17 tests covering: deterministic scoring logic, RAG chunking/retrieval
+40 tests covering: deterministic scoring logic, RAG chunking/retrieval
 correctness (including a semantic relevance check — a query about pasta
 should retrieve the cooking page, not the finance page), keyword phrase
-extraction, and two full end-to-end pipeline runs through the actual
-LangGraph graph with fakes injected at the LLM/search boundary.
+extraction with real-world noisy text, full-page scraping extraction and
+all fallback paths (fetch failure, 403, thin content, mixed success/failure),
+token/cost telemetry math and per-step bucketing, and two full end-to-end
+pipeline runs through the actual LangGraph graph with fakes injected at the
+LLM/search boundary.
 
 ## What's out of scope (by design, not oversight)
 
 - Auth/rate-limiting on the API — internal tool, not public-facing
 - Persistent storage of past briefs — each run is stateless; add a DB layer
   if history/versioning becomes a requirement
-- Real competitor page scraping (vs. SERP snippets) — `SerpAPIProvider`
-  currently uses search snippets; a production version would fetch and parse
-  full page HTML for richer RAG context
+- Scraping-API integration for consistent full-page extraction at scale —
+  direct fetches succeed on ~50% of pages due to bot-blocking; ScraperAPI or
+  Zyte with rotating proxies would fix this but adds a paid dependency and
+  operational overhead not warranted for an internal tool
