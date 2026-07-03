@@ -48,6 +48,7 @@ export interface StepUsage {
 }
 
 export interface TokenUsage {
+  model: string;
   total_calls: number;
   prompt_tokens: number;
   completion_tokens: number;

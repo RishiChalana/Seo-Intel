@@ -18,14 +18,17 @@ from __future__ import annotations
 
 from pydantic import BaseModel, Field
 
-# Gemini pricing in USD per 1M tokens: (input, output). Estimates - update if
-# Google changes rates. Output price is applied to completion + thinking
-# tokens, which Gemini 2.5 bills at the output rate.
+# Pricing in USD per 1M tokens: (input, output). Estimates - update if a
+# provider changes rates. For Gemini 2.5 the output price also covers
+# thinking tokens, which are billed at the output rate.
 _PRICING_PER_1M: dict[str, tuple[float, float]] = {
     "gemini-2.5-flash": (0.30, 2.50),
     "gemini-2.5-pro": (1.25, 10.00),
     "gemini-1.5-flash": (0.075, 0.30),
     "gemini-1.5-pro": (1.25, 5.00),
+    # Groq
+    "llama-3.3-70b-versatile": (0.59, 0.79),
+    "llama-3.1-8b-instant": (0.05, 0.08),
 }
 _DEFAULT_PRICING = (0.30, 2.50)
 
@@ -49,6 +52,7 @@ class StepUsage(BaseModel):
 class TokenUsage(BaseModel):
     """Aggregate LLM usage for a single pipeline run, surfaced on the API."""
 
+    model: str = ""
     total_calls: int = 0
     prompt_tokens: int = 0
     completion_tokens: int = 0
@@ -113,6 +117,7 @@ class UsageTracker:
                 step.estimated_cost_usd = round(step.estimated_cost_usd + cost, 6)
 
         return TokenUsage(
+            model=self._records[-1]["model"] if self._records else "",
             total_calls=len(self._records),
             prompt_tokens=total_prompt,
             completion_tokens=total_completion,

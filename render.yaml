@@ -16,6 +16,10 @@ services:
       - key: PYTHON_VERSION
         value: 3.12.3
       # Secrets — set these in the Render dashboard (sync:false = not committed).
+      # GROQ_API_KEY is the default backend; GEMINI_API_KEY is an optional
+      # fallback. Set at least one.
+      - key: GROQ_API_KEY
+        sync: false
       - key: GEMINI_API_KEY
         sync: false
       - key: SERPAPI_KEY

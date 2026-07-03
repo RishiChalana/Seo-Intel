@@ -122,3 +122,56 @@ async def test_gemini_client_records_usage_from_response(monkeypatch):
     assert summary.completion_tokens == 75
     assert summary.by_step[0].label == "_Schema"
     assert summary.estimated_cost_usd > 0
+    assert summary.model == "gemini-2.5-flash"
+
+
+# --- GroqLLMClient usage extraction (mocked, no network) -----------------
+
+
+class _FakeGroqUsage:
+    prompt_tokens = 200
+    completion_tokens = 90
+
+
+class _FakeGroqMessage:
+    content = '{"value": "hi"}'
+
+
+class _FakeGroqChoice:
+    message = _FakeGroqMessage()
+
+
+class _FakeGroqResponse:
+    choices = [_FakeGroqChoice()]
+    usage = _FakeGroqUsage()
+
+
+class _FakeCompletions:
+    async def create(self, **kwargs):
+        return _FakeGroqResponse()
+
+
+class _FakeChat:
+    completions = _FakeCompletions()
+
+
+class _FakeGroqClient:
+    chat = _FakeChat()
+
+
+async def test_groq_client_records_usage_from_response(monkeypatch):
+    from app.core.llm import GroqLLMClient
+
+    monkeypatch.setenv("GROQ_API_KEY", "fake-key")
+    client = GroqLLMClient()
+    client._client = _FakeGroqClient()  # swap real SDK client for fake
+
+    result = await client.complete_structured("sys", "prompt", _Schema)
+    assert result.value == "hi"
+
+    summary = client.usage.summary()
+    assert summary.total_calls == 1
+    assert summary.prompt_tokens == 200
+    assert summary.completion_tokens == 90
+    assert summary.model == "llama-3.3-70b-versatile"
+    assert summary.estimated_cost_usd > 0

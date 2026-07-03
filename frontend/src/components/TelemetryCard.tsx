@@ -37,7 +37,7 @@ export function TelemetryCard({ usage }: { usage: TokenUsage }) {
       </div>
 
       <div className="space-y-2.5 border-t border-surface-variant py-4 text-sm">
-        <Row label="Model" value="gemini-2.5-flash" />
+        <Row label="Model" value={usage.model || "—"} />
         <Row label="LLM calls" value={usage.total_calls.toString()} />
         <Row label="Input tokens" value={usage.prompt_tokens.toLocaleString()} />
         <Row

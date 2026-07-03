@@ -1,4 +1,4 @@
-import { Bell, Plus, Settings } from "lucide-react";
+import { Plus } from "lucide-react";
 import { Logo } from "./Logo";
 
 interface HeaderProps {
@@ -11,11 +11,8 @@ export function Header({ showNav, onNewBrief }: HeaderProps) {
   return (
     <header className="sticky top-0 z-50 flex h-16 items-center justify-between border-b border-surface-variant bg-white px-6 md:px-margin-desktop">
       <div className="flex items-center gap-8">
-        <button onClick={onNewBrief} className="flex items-center">
+        <button onClick={onNewBrief} className="flex items-center" aria-label="Home">
           <Logo />
-          <span className="ml-3 hidden border-l border-outline-variant pl-3 font-heading text-lg font-bold text-brand-deep lg:inline">
-            SEO Intelligence
-          </span>
         </button>
         {showNav && (
           <nav className="hidden items-center gap-6 md:flex">
@@ -36,23 +33,14 @@ export function Header({ showNav, onNewBrief }: HeaderProps) {
         )}
       </div>
 
-      <div className="flex items-center gap-2">
-        {showNav && (
-          <button
-            onClick={onNewBrief}
-            className="mr-2 hidden items-center gap-1.5 rounded bg-primary-container px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-brand-deep sm:flex"
-          >
-            <Plus size={16} /> New Brief
-          </button>
-        )}
-        <button className="rounded-full p-2 text-secondary transition-colors hover:bg-surface-container-low hover:text-primary">
-          <Bell size={20} />
+      {showNav && (
+        <button
+          onClick={onNewBrief}
+          className="hidden items-center gap-1.5 rounded bg-primary-container px-3 py-1.5 text-sm font-medium text-white transition-colors hover:bg-brand-deep sm:flex"
+        >
+          <Plus size={16} /> New Brief
         </button>
-        <button className="rounded-full p-2 text-secondary transition-colors hover:bg-surface-container-low hover:text-primary">
-          <Settings size={20} />
-        </button>
-        <div className="ml-1 h-8 w-8 overflow-hidden rounded-full border border-outline-variant bg-gradient-to-br from-primary-fixed to-primary-container" />
-      </div>
+      )}
     </header>
   );
 }

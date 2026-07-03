@@ -57,7 +57,8 @@ npm run preview      # serve the built bundle
 
 ## Note on the live API
 
-The backend uses Gemini 2.5 Flash. The **free tier is capped at 20 requests/day**;
-if you see a `RESOURCE_EXHAUSTED` / 429 error surfaced on the input screen, the
-daily quota is spent — wait for the reset or use a billed key. The UI handles
-this gracefully (the error is shown, no crash).
+The backend prefers Groq (`llama-3.3-70b`) and falls back to Gemini. If the
+provider's rate limit is hit, a `429` is surfaced on the input screen — wait a
+moment and retry, or use a billed key. The UI handles it gracefully (the error
+is shown, no crash), and the telemetry card reports whichever model actually
+ran via `usage.model`.
