@@ -1,7 +1,11 @@
+import httpx
 import pytest
+from tenacity import wait_none
 
+from app.agents import research_agent
 from app.agents.research_agent import (
     MockSearchProvider,
+    SerpAPIProvider,
     enrich_pages_with_full_content,
     extract_headings,
     extract_readable_text,
@@ -148,3 +152,48 @@ async def test_mock_provider_includes_topic_in_content():
     pages = await provider.search("email marketing", num_results=1)
     assert "email marketing" in pages[0].raw_text.lower()
     assert pages[0].word_count > 0
+
+
+# --- SerpAPIProvider timeout / retry degradation -------------------------
+
+
+class _TimeoutClient:
+    """Fake httpx.AsyncClient whose GET always raises a read timeout.
+
+    Records how many times it was called so the test can assert the retry
+    decorator actually re-attempted the request. Mirrors the existing pattern
+    of faking the HTTP layer so no real network call happens in CI.
+    """
+
+    calls = 0
+
+    def __init__(self, *args, **kwargs):
+        pass
+
+    async def __aenter__(self):
+        return self
+
+    async def __aexit__(self, *args):
+        return False
+
+    async def get(self, *args, **kwargs):
+        type(self).calls += 1
+        raise httpx.ReadTimeout("read timed out")
+
+
+async def test_serp_search_retries_then_returns_empty_on_read_timeout(monkeypatch):
+    monkeypatch.setenv("SERPAPI_KEY", "test-key")
+    _TimeoutClient.calls = 0
+    monkeypatch.setattr(research_agent.httpx, "AsyncClient", _TimeoutClient)
+    # Drop the exponential backoff so the 3 attempts don't actually sleep.
+    monkeypatch.setattr(
+        SerpAPIProvider._fetch_serp_results.retry, "wait", wait_none()
+    )
+
+    provider = SerpAPIProvider()
+    # A SerpAPI outage must degrade to an empty result set, not raise.
+    pages = await provider.search("email marketing", num_results=3)
+
+    assert pages == []
+    # stop_after_attempt(3): the request is tried exactly three times.
+    assert _TimeoutClient.calls == 3

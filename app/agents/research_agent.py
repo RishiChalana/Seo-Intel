@@ -17,6 +17,7 @@ so one dead/paywalled URL never degrades the rest of the run.
 from __future__ import annotations
 
 import asyncio
+import logging
 import os
 import re
 from abc import ABC, abstractmethod
@@ -24,13 +25,25 @@ from typing import Awaitable, Callable, Optional
 
 import httpx
 import trafilatura
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
 
 from app.core.schemas import CompetitorPage
+
+logger = logging.getLogger(__name__)
 
 # A page must yield at least this many words of extracted body text to be
 # considered a successful scrape; below it we keep the SERP snippet instead.
 _MIN_ARTICLE_WORDS = 60
 _PAGE_TIMEOUT = httpx.Timeout(10.0)
+# Split timeout for the SerpAPI call: cap connection setup tightly (5s) so a
+# dead/unreachable endpoint fails fast, while allowing up to 15s for the
+# server to actually respond once connected.
+_SERP_TIMEOUT = httpx.Timeout(15.0, connect=5.0)
 # Many sites 403 the default httpx UA; present as a normal browser/bot.
 _USER_AGENT = (
     "Mozilla/5.0 (compatible; SEOIntelBot/1.0; +https://github.com/seo-intel)"
@@ -146,14 +159,40 @@ class SerpAPIProvider(SearchProvider):
             )
         self._scrape_full_pages = scrape_full_pages
 
-    async def search(self, query: str, num_results: int) -> list[CompetitorPage]:
-        async with httpx.AsyncClient(timeout=15) as client:
+    @retry(
+        stop=stop_after_attempt(3),
+        wait=wait_exponential(multiplier=1, min=1, max=6),
+        retry=retry_if_exception_type((httpx.ReadTimeout, httpx.ConnectTimeout)),
+        reraise=True,
+    )
+    async def _fetch_serp_results(self, query: str, num_results: int) -> dict:
+        """Perform the SerpAPI request, retrying transient timeouts.
+
+        Retries only on read/connect timeouts (the failure mode seen crashing
+        production); other HTTP errors surface immediately. After 3 exhausted
+        attempts the last exception is re-raised for the caller to handle.
+        """
+        async with httpx.AsyncClient(timeout=_SERP_TIMEOUT) as client:
             resp = await client.get(
                 self.BASE_URL,
                 params={"q": query, "api_key": self._api_key, "num": num_results},
             )
             resp.raise_for_status()
-            data = resp.json()
+            return resp.json()
+
+    async def search(self, query: str, num_results: int) -> list[CompetitorPage]:
+        try:
+            data = await self._fetch_serp_results(query, num_results)
+        except httpx.HTTPError as exc:
+            # A SerpAPI outage/timeout should degrade the brief, not crash the
+            # whole run. Return no competitor pages; downstream nodes handle an
+            # empty result set gracefully (falling back to general SEO practice).
+            logger.warning(
+                "SerpAPI request failed after retries (%s); returning no "
+                "competitor pages so the brief degrades gracefully.",
+                exc,
+            )
+            return []
 
         pages = []
         for i, result in enumerate(data.get("organic_results", [])[:num_results]):

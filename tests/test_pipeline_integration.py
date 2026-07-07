@@ -11,7 +11,7 @@ test that proves the wiring works, not just each piece in isolation.
 import pytest
 
 from app.agents.keyword_agent import _ClusterLabelResponse
-from app.agents.research_agent import MockSearchProvider
+from app.agents.research_agent import MockSearchProvider, SearchProvider
 from app.core.llm import FakeLLMClient
 from app.core.schemas import (
     ContentOutline,
@@ -100,3 +100,33 @@ async def test_pipeline_score_reflects_grounded_outline():
 
     assert brief.score.structure_completeness == 1.0
     assert brief.score.eeat_signal_score > 0
+
+
+class _EmptySearchProvider(SearchProvider):
+    """Simulates a SerpAPI outage: search() degrades to an empty page list."""
+
+    async def search(self, query: str, num_results: int) -> list:
+        return []
+
+
+@pytest.mark.asyncio
+async def test_pipeline_completes_when_research_returns_no_pages():
+    """A SerpAPI outage (zero competitor pages) must degrade to a best-effort
+    brief, not crash the graph. Every downstream node has to tolerate an empty
+    page list end-to-end."""
+    request = PipelineRequest(topic="podcast editing", max_competitors=3)
+    llm = _build_fake_llm()
+
+    brief = await run_pipeline(
+        request=request,
+        search_provider=_EmptySearchProvider(),
+        llm=llm,
+        embedder_factory=lambda: TfidfEmbedder(n_components=8),
+    )
+
+    assert brief.topic == "podcast editing"
+    assert brief.competitor_pages_analyzed == 0
+    # The outline still gets produced (grounded only in general SEO practice).
+    assert brief.outline.title
+    assert len(brief.keyword_clusters) >= 1
+    assert 0.0 <= brief.score.overall <= 1.0

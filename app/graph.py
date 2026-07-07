@@ -11,6 +11,7 @@ with the rest of the portfolio rather than a one-off script.
 
 from __future__ import annotations
 
+import logging
 from typing import Callable, Optional, TypedDict
 
 from langgraph.graph import END, StateGraph
@@ -29,6 +30,8 @@ from app.core.schemas import (
 )
 from app.rag.embedder import Embedder, get_embedder
 from app.rag.store import CompetitorRAGStore
+
+logger = logging.getLogger(__name__)
 
 
 class PipelineState(TypedDict, total=False):
@@ -68,6 +71,17 @@ def build_graph(
     async def research_node(state: PipelineState) -> PipelineState:
         req = state["request"]
         pages = await search_provider.search(req.topic, req.max_competitors)
+        if not pages:
+            # The search provider degrades to an empty list on a SerpAPI
+            # outage (see SerpAPIProvider.search). Downstream nodes (index,
+            # keywords, outline) all handle zero competitor pages, so we let
+            # the run continue and produce a best-effort, ungrounded brief
+            # rather than failing the whole request.
+            logger.warning(
+                "Research returned zero competitor pages for topic %r; "
+                "continuing with a degraded, ungrounded brief.",
+                req.topic,
+            )
         return {"pages": pages}
 
     async def index_node(state: PipelineState) -> PipelineState:
